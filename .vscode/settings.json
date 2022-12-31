@@ -1,0 +1,13 @@
+{
+    "java.project.sourcePaths": [
+        "src/com/iflytek/stumanager/util"
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "web/WEB-INF/lib/javase-3.3.3.jar",
+        "web/WEB-INF/lib/commons-logging-1.2.jar",
+        "web/WEB-INF/lib/json-lib-2.1-jdk15.jar",
+        "web/WEB-INF/lib/commons-beanutils-1.7.0.jar",
+        "web/WEB-INF/lib/commons-lang-2.3.jar"
+    ]
+}
