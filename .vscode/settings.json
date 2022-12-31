@@ -1,18 +1,11 @@
 {
     "java.project.sourcePaths": [
         "src",
-        "web"
+        "web",
+        "apache-tomcat-7.0.99"
     ],
     "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "web/WEB-INF/lib/javase-3.3.3.jar",
-        "web/WEB-INF/lib/commons-logging-1.2.jar",
-        "web/WEB-INF/lib/json-lib-2.1-jdk15.jar",
-        "web/WEB-INF/lib/commons-beanutils-1.7.0.jar",
-        "web/WEB-INF/lib/commons-lang-2.3.jar",
-        "web/WEB-INF/lib/ezmorph-1.0.3.jar",
-        "web/WEB-INF/lib/core-3.3.3.jar",
-        "web/WEB-INF/lib/goeasy-sdk-0.3.14.jar",
-        "web/WEB-INF/lib/commons-collections-3.2.jar"
+        "web/**/*.jar",
+        "apache-tomcat-7.0.99/lib/*.jar"
     ]
 }
