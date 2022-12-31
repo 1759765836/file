@@ -1,6 +1,6 @@
 {
     "java.project.sourcePaths": [
-        "src/com/iflytek/stumanager/util"
+        "src"
     ],
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
