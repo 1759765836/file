@@ -1,10 +1,3 @@
-// todesk
-613836505 123qweE#
-szzhlzssYJY2021
-
-C:\Program Files (x86)\Sangfor\SSL\SangforPWEx
-
-
 package com.landray.kmss.km.agreement.util;
 
 import net.sf.json.JSONArray;
@@ -32,7 +25,7 @@ public class JsonUtil {
 //		EMPTY_EXCLUDNAME = new HashSet<String>();
 //	}
 	private final HashSet<String> excludeFieldNames = new HashSet<>();
-	// ·Ç¾²Ì¬ÄÚ²¿Àà£¬ÏÈ´´½¨Íâ²¿ÀàµÄÊµÀı
+	// éé™æ€å†…éƒ¨ç±»ï¼Œå…ˆåˆ›å»ºå¤–éƒ¨ç±»çš„å®ä¾‹
 	public abstract static class ClassCustomizer<T> {
 		Class<?> clazz = this.getClass();
 		public abstract JSONObject getValue(T object);
@@ -93,14 +86,14 @@ public class JsonUtil {
 	public JSONObject parse(Object bean) {
 		JsonConfig jsonConfig = new JsonConfig();
 		jsonConfig.setExcludes(new String[] { "handler", "hibernateLazyInitializer", "interceptFieldCallback" });
-//		jsonConfig.setIgnoreDefaultExcludes(false); // ÉèÖÃÄ¬ÈÏºöÂÔ
+//		jsonConfig.setIgnoreDefaultExcludes(false); // è®¾ç½®é»˜è®¤å¿½ç•¥
 		jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
 //		jsonConfig.setIgnoreTransientFields(false);
 		return JSONObject.fromObject(bean, jsonConfig);
 	}
 	
 	/**
-	 * JavaBean×ª»»ÎªJSONObject
+	 * JavaBeanè½¬æ¢ä¸ºJSONObject
 	 */
 	public JSONObject beanToJson(Object bean) {
 		final JsonUtil jsonUtil = this;
@@ -160,7 +153,7 @@ public class JsonUtil {
 //		for (PropertyDescriptor propertyDescriptor: propertyDescriptors) {
 //			this.oneBreadthIsRecursion = false;
 //			this.setJsonObject(jsonObject, bean, propertyDescriptor, this.recursionTimes);
-//			// µ±Ç°¶ÔÏóµİ¹é½áÊø
+//			// å½“å‰å¯¹è±¡é€’å½’ç»“æŸ
 //			if(this.oneBreadthIsRecursion) {
 //				this.oneDepthAllRecursionObject.clear();
 //			}
@@ -171,7 +164,7 @@ public class JsonUtil {
 			HashMap<Integer, Object> hashMap = new HashMap<>();
 			this.recursionObject.add(hashMap);
 		}
-		// ³õÊ¼¶ÔÏóÊ¼ÖÕ±£Áô²»ÔÙµİ¹é³ö¸Ã¶ÔÏóµÄÖØ¸´Êı¾İ¼ÓÈëjsonÖĞ
+		// åˆå§‹å¯¹è±¡å§‹ç»ˆä¿ç•™ä¸å†é€’å½’å‡ºè¯¥å¯¹è±¡çš„é‡å¤æ•°æ®åŠ å…¥jsonä¸­
 		HashMap<Integer, Object> hashMap = new HashMap<>();
 		hashMap.put(bean.hashCode(), bean);
 		this.recursionObject.add(hashMap);
@@ -180,7 +173,7 @@ public class JsonUtil {
 	}
 
 	/**
-	 * ½âÎöJavaBean
+	 * è§£æJavaBean
 	 */
 	public JSONObject parseBean(Object bean, int recursionTimes, ClassCustomizer<?> classCustomizer) {
 //		this.oneBreadthIsRecursion = true;
@@ -197,7 +190,7 @@ public class JsonUtil {
 	private void setJsonObject(JSONObject jsonObject, PropertyDescriptor propertyDescriptor,
 			Object bean, int recursionTimes, ClassCustomizer<?> classCustomizer) {
 		String name = propertyDescriptor.getName();
-		// Í¨¹ı¹şÏ£º¯Êı£¬ÄÜ¹»¿ìËÙµØ¶ÔÊı¾İÔªËØ½øĞĞ¶¨Î»£¬hashËã·¨¾¡Á¿¼õÉÙ³åÍ»Ê¹Á´±í³¤¶È¾¡¿ÉÄÜ¶Ì£¬ÀíÏë×´Ì¬ÏÂÊ±¼ä¸´ÔÓ¶ÈÎªO(1)
+		// é€šè¿‡å“ˆå¸Œå‡½æ•°ï¼Œèƒ½å¤Ÿå¿«é€Ÿåœ°å¯¹æ•°æ®å…ƒç´ è¿›è¡Œå®šä½ï¼Œhashç®—æ³•å°½é‡å‡å°‘å†²çªä½¿é“¾è¡¨é•¿åº¦å°½å¯èƒ½çŸ­ï¼Œç†æƒ³çŠ¶æ€ä¸‹æ—¶é—´å¤æ‚åº¦ä¸ºO(1)
 		if (!this.excludeFieldNames.contains(name)) {
 			Method readMethod = propertyDescriptor.getReadMethod();
 			if (readMethod != null) {
@@ -210,7 +203,7 @@ public class JsonUtil {
 				}
 				
 				Object value = this.getValue(property, recursionTimes, classCustomizer);
-				// keyÎªnullÊ±£¬net.sf.json.JSONObjectÎŞ·¨´æÈë£¬ĞŞ¸ÄÎª"null"¡£valueÎªnullÊ±£¬ĞŞ¸ÄÎª¿ÕÈÔÈ»´æ·Åµ½jsonObject
+				// keyä¸ºnullæ—¶ï¼Œnet.sf.json.JSONObjectæ— æ³•å­˜å…¥ï¼Œä¿®æ”¹ä¸º"null"ã€‚valueä¸ºnullæ—¶ï¼Œä¿®æ”¹ä¸ºç©ºä»ç„¶å­˜æ”¾åˆ°jsonObject
 				jsonObject.put(name == null ? "null" : name, value == null ? "" : value);
 			} else {
 				this.excludeFieldNames.add(name);
@@ -220,12 +213,12 @@ public class JsonUtil {
 	}
 
 	/**
-	 * »ñÈ¡×Ö¶ÎµÄÖµ
-	 * @param object ×Ö¶Î¶ÔÏó
-	 * @param recursionTimes µİ¹é´ÎÊı
+	 * è·å–å­—æ®µçš„å€¼
+	 * @param object å­—æ®µå¯¹è±¡
+	 * @param recursionTimes é€’å½’æ¬¡æ•°
 	 */
 	public <T> Object getValue(Object object, int recursionTimes, ClassCustomizer<T> classCustomizer) {
-		// JSONObjectÖĞ·ÅÖÃMapµÄÊ±ºò£¬»á×Ô¶¯½«Map¿´³ÉÊÇJSONObjectÀ´´¦Àí¡£JSON allows only string to be a key
+		// JSONObjectä¸­æ”¾ç½®Mapçš„æ—¶å€™ï¼Œä¼šè‡ªåŠ¨å°†Mapçœ‹æˆæ˜¯JSONObjectæ¥å¤„ç†ã€‚JSON allows only string to be a key
 //		if(recursionTimes <= 0)
 //			return object.getClass();
 //		--recursionTimes;
@@ -240,7 +233,7 @@ public class JsonUtil {
 			
 			Collection<?> collection = (Collection<?>) object;
 			for (Object next : collection) {
-				// ÏŞÖÆ¹ı¶à¶ÔÏó¼¯ºÏ
+				// é™åˆ¶è¿‡å¤šå¯¹è±¡é›†åˆ
 //            	Class<?> superclass = next.getClass().getSuperclass();
 //            	Integer times = this.recursionClassTimes.get(superclass.getName());
 //        		if(times != null) 
@@ -292,7 +285,7 @@ public class JsonUtil {
 			
 			if (recursionTimes <= 0) return object.getClass();
 
-			// Çå³ı¸Ãµİ¹é´ÎÊıÖĞµÄËùÓĞ¶ÔÏó
+			// æ¸…é™¤è¯¥é€’å½’æ¬¡æ•°ä¸­çš„æ‰€æœ‰å¯¹è±¡
 			for (int i = recursionTimes; i > 0; i--) {
 				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
 				if (hashMap.isEmpty()) {
@@ -302,40 +295,40 @@ public class JsonUtil {
 				}
 			}
 
-			// Á½¸ö¶ÔÏóÊÇ°üº¬µÄ¹ØÏµ
+			// ä¸¤ä¸ªå¯¹è±¡æ˜¯åŒ…å«çš„å…³ç³»
 			int hashCode = object.hashCode();
 			for (int i = recursionTimes + 1; i <= this.recursionTimes + 1; i++) {
 				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
-				// ÏÈ±È½Ï¹şÏ£Âë
+				// å…ˆæ¯”è¾ƒå“ˆå¸Œç 
 				Object oldObject = hashMap.get(hashCode);
 				if (oldObject != null) {
 					/*
-					 * ´Ë·½·¨Ö»±È½Ïpublic×Ö¶Î¡£
-					 * ²»±È½Ïtransient×Ö¶Î£¬ÒòÎªËüÃÇ²»ÄÜ±»ĞòÁĞ»¯¡£
-					 * ´ËÍâ£¬´Ë·½·¨²»±È½Ïstatic×Ö¶Î£¬ÒòÎªËüÃÇ²»ÊÇ¶ÔÏóÊµÀıµÄÒ»²¿·Ö¡£
-					 * Èç¹ûÄ³¸ö×Ö¶ÎÊÇÒ»¸öÊı×é/Map/Collection£¬Ôò±È½ÏÄÚÈİ£¬¶ø²»ÊÇ¶ÔÏóµÄÒıÓÃ¡£
-					 * @param excludeFields  ²»±È½ÏµÄ×Ö¶Î
+					 * æ­¤æ–¹æ³•åªæ¯”è¾ƒpublicå­—æ®µã€‚
+					 * ä¸æ¯”è¾ƒtransientå­—æ®µï¼Œå› ä¸ºå®ƒä»¬ä¸èƒ½è¢«åºåˆ—åŒ–ã€‚
+					 * æ­¤å¤–ï¼Œæ­¤æ–¹æ³•ä¸æ¯”è¾ƒstaticå­—æ®µï¼Œå› ä¸ºå®ƒä»¬ä¸æ˜¯å¯¹è±¡å®ä¾‹çš„ä¸€éƒ¨åˆ†ã€‚
+					 * å¦‚æœæŸä¸ªå­—æ®µæ˜¯ä¸€ä¸ªæ•°ç»„/Map/Collectionï¼Œåˆ™æ¯”è¾ƒå†…å®¹ï¼Œè€Œä¸æ˜¯å¯¹è±¡çš„å¼•ç”¨ã€‚
+					 * @param excludeFields  ä¸æ¯”è¾ƒçš„å­—æ®µ
 					 */
 					if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
 					//if (this.isEquals(oldObject, object)) {
-						// ¶¨ÖÆBaseModel¶ÔÏó
+						// å®šåˆ¶BaseModelå¯¹è±¡
 						if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
 							String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
 							JSONObject json = new JSONObject();
 							json.put("fdId", fdId);
 							return json;
 						}
-						// ÏàÍ¬¶ÔÏó·µ»Ønull
+						// ç›¸åŒå¯¹è±¡è¿”å›null
 						return null;
 					} else {
-						log.warn(object.getClass() + "£º" + object.toString() + " ×Ö¶Î²»ÏàµÈ£¡");
+						log.warn(object.getClass() + "ï¼š" + object.toString() + " å­—æ®µä¸ç›¸ç­‰ï¼");
 					}
 				}
 			}
 			HashMap<Integer, Object> hashMap = this.recursionObject.get(recursionTimes);
 			hashMap.put(hashCode, object);
 
-			// ÔÙ´Î½âÎö²¢ÇÒµİ¹é´ÎÊı¼õÒ»
+			// å†æ¬¡è§£æå¹¶ä¸”é€’å½’æ¬¡æ•°å‡ä¸€
 			// JSONObject objectValue = getMethodValue(object, --recursionTimes);
 			value = this.parseBean(object, --recursionTimes, classCustomizer);
 		}
@@ -370,7 +363,7 @@ public class JsonUtil {
 		public <T> boolean isEquals(Object oldObject, Object newObject, String... ignoreProperties) {
 			boolean isEquals = true;
 			if (oldObject != null && newObject != null) {
-				// Èç¹ûÃ»ÓĞÖØĞ´equals·½·¨½«»áÅĞ¶ÏÁ½¸ö¶ÔÏóÄÚ´æµØÖ·ÊÇ·ñÒ»ÖÂ¼´oldObject==newObject
+				// å¦‚æœæ²¡æœ‰é‡å†™equalsæ–¹æ³•å°†ä¼šåˆ¤æ–­ä¸¤ä¸ªå¯¹è±¡å†…å­˜åœ°å€æ˜¯å¦ä¸€è‡´å³oldObject==newObject
 				if (oldObject.equals(newObject)) {
 					return true;
 				}
@@ -393,7 +386,7 @@ public class JsonUtil {
 								break;
 							}
 						}
-						// Á½¸ö¶ÔÏó¶¼Ö¸Ïònull
+						// ä¸¤ä¸ªå¯¹è±¡éƒ½æŒ‡å‘null
 					} else if (oldObjectPropertyValue != newObjectPropertyValue) {
 						isEquals = false;
 						break;
@@ -405,7 +398,7 @@ public class JsonUtil {
 			return isEquals;
 		}
 
-		// »ñÈ¡¶ÔÏóÊôĞÔÃû×ÖºÍÊıÖµ
+		// è·å–å¯¹è±¡å±æ€§åå­—å’Œæ•°å€¼
 		public <T> Map<String, Object> getObjectPropertyMap(Object object, String... ignoreProperties) {
 			Class<?> objectClass = object.getClass();
 			PropertyDescriptor[] propertyDescriptors = org.apache.commons.beanutils.PropertyUtils.getPropertyDescriptors(objectClass);
@@ -453,14 +446,14 @@ public class JsonUtil {
 		@SuppressWarnings("unused")
 		private JSONObject parseForDeclaredField(Object bean, int recursionTimes) {
 			JSONObject jsonObject = new JSONObject();
-			// Í¨¹ıgetDeclaredFields()?·¨»ñÈ¡¶ÔÏóÀàÖĞµÄËùÓĞÊôĞÔ£¨º¬Ë½ÓĞ£©
+			// é€šè¿‡getDeclaredFields()?æ³•è·å–å¯¹è±¡ç±»ä¸­çš„æ‰€æœ‰å±æ€§ï¼ˆå«ç§æœ‰ï¼‰
 			java.lang.reflect.Field[] fields = bean.getClass().getDeclaredFields();
 
 			for (java.lang.reflect.Field field : fields) {
-				// ÉèÖÃÔÊĞíÍ¨¹ı·´Éä·ÃÎÊË½ÓĞ±äÁ¿
+				// è®¾ç½®å…è®¸é€šè¿‡åå°„è®¿é—®ç§æœ‰å˜é‡
 				// if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
-				// »ñÈ¡×Ö¶ÎÊôĞÔÃû³Æ
+				// è·å–å­—æ®µå±æ€§åç§°
 				String name = field.getName();
 				Object object = null;
 				try {
@@ -475,7 +468,7 @@ public class JsonUtil {
 //					Object value = getValue(object, recursionTimes);
 //					jsonObject.put(name, value);
 				} else {
-					// ±ÜÃâÃ»Öµ¶øµ¼ÖÂÇ°¶Ëundefined
+					// é¿å…æ²¡å€¼è€Œå¯¼è‡´å‰ç«¯undefined
 					jsonObject.put(name, "");
 				}
 			}
@@ -533,11 +526,11 @@ public class JsonUtil {
 				String name1 = field.getName();
 				if (object1 != null && name1 != null && name1 != "") {
 					if (object1 instanceof Method) {
-						// ¶ÔÏóµÄ×éÖ¯¼Ü¹¹¶ÔÏóµ÷ÓÃget·½·¨È¡Öµ
+						// å¯¹è±¡çš„ç»„ç»‡æ¶æ„å¯¹è±¡è°ƒç”¨getæ–¹æ³•å–å€¼
 						if (name1.contains("getFd")) {
 							Method method = (Method) object1;
 							Class<?>[] parameterTypes = method.getParameterTypes();
-							// Ã»ÓĞ²ÎÊıµ÷ÓÃ
+							// æ²¡æœ‰å‚æ•°è°ƒç”¨
 							if (parameterTypes.length == 0) {
 								Object invoke = null;
 								try {
