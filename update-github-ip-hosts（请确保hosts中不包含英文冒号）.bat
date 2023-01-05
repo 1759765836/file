@@ -6,11 +6,11 @@ setlocal enabledelayedexpansion
 rem 根据内容标记符号
 set "start_flag=0"
 
-rem 将 hosts 文件中的内容复制到临时文件 temp 中, > temp表示覆盖文件
+rem 将 hosts 文件中的内容覆盖（单个大于号）到临时文件 temp 中
 type C:\Windows\System32\drivers\etc\hosts > temp
 rem 清空文件
-type null > C:\Windows\System32\drivers\etc\hosts
-::cd. > C:\Windows\System32\drivers\etc\hosts
+::type null > C:\Windows\System32\drivers\etc\hosts
+cd. > C:\Windows\System32\drivers\etc\hosts
 
 rem 使用 findstr /n 读取临时文件 temp 的每一行，并在行前添加行号
 for /f "delims=" %%i in ('findstr /n .* temp') do (
@@ -40,3 +40,5 @@ rem 使用del命令删除temp.txt临时文件
 del temp.txt
 
 echo Done.
+ipconfig -flushdns
+pause
