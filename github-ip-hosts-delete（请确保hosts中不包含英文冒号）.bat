@@ -34,7 +34,7 @@ for /f "delims=" %%i in ('findstr /n .* temp.txt') do (
 	::if "!line!" == "# GitHub520 Host End" set "start_flag=0"
 	rem 如果读到的行包含 "# GitHub520 Host Start"，设置开始标记
 	if not "!line:# GitHub520 Host End=!" == "!line!" (
-		rem 如果当前行不等于空行，则将该行写入新的 host1 文件中
+		rem 如果当前行不等于空行
 		if not "!line!" == "" (
 			set "start_flag=0"
 			echo 删除到最后一行：%%i
