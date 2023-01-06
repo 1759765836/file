@@ -42,16 +42,6 @@ for /f "delims=" %%i in ('findstr /n .* temp.txt') do (
 		)
 	)
 )
-echo 从 https://raw.hellogithub.com/hosts 上下载内容追加到hosts文件末尾
-rem  使用curl命令下载内容，并将其输出（覆盖）到文件中。
-curl %update_url% --output temp.txt
-rem 使用type命令将temp.txt追加到hosts文件中
-type temp.txt >> %hosts_file%
-rem 使用copy命令将temp.txt复制到hosts文件中，/y参数表示覆盖文件
-::copy /y temp.txt %hosts_file%
-rem 使用del命令删除temp.txt临时文件
 del temp.txt
-echo.
-echo 可重复执行进行更新hosts
 ipconfig -flushdns
 pause
