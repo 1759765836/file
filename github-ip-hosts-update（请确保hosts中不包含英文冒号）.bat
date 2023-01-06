@@ -8,9 +8,6 @@ set "update_url=https://raw.hellogithub.com/hosts"
 
 rem 根据内容标记符号
 set "start_flag=0"
-rem 空两行来设置换行符
-
-
 
 rem 将 hosts 文件中的内容复制到临时文件 temp.txt 中, > temp表示覆盖文件
 type %hosts_file% > temp.txt
@@ -19,7 +16,8 @@ cd. > %hosts_file%
 ::type null > %hosts_file%
 ::echo # > C:\Windows\System32\drivers\etc\hosts
 rem 先将上一次更新的删掉，保留原有域名ip映射
-echo 读取 %hosts_file% 文件中每一行
+echo.
+echo 从 %hosts_file% 读取文件中每一行
 rem 使用 findstr /n 读取临时文件 temp.txt 的每一行，并在行前添加行号
 for /f "delims=" %%i in ('findstr /n .* temp.txt') do (
 	set "line=%%i"
@@ -39,10 +37,8 @@ for /f "delims=" %%i in ('findstr /n .* temp.txt') do (
 		rem 如果当前行不等于空行，则将该行写入新的 host1 文件中
 		if not "!line!" == "" (
 			set "start_flag=0"
-			set 换行符=^
-			
-			
-			echo 删除到最后一行：%%i!换行符!
+			echo 删除到最后一行：%%i
+			echo.
 		)
 	)
 )
@@ -55,9 +51,7 @@ rem 使用copy命令将temp.txt复制到hosts文件中，/y参数表示覆盖文件
 ::copy /y temp.txt %hosts_file%
 rem 使用del命令删除temp.txt临时文件
 del temp.txt
-set 换行符=^
-
-
-echo !换行符!可重复执行进行更新hosts
+echo.
+echo 可重复执行进行更新hosts
 ipconfig -flushdns
 pause
