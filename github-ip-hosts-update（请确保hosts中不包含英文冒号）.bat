@@ -1,8 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem hosts文件路径
-set "hosts_file=%WINDIR%\system32\drivers\etc\hosts"
+rem hosts文件路径（不区分大小写）
+set "hosts_file=%WINDIR%\System32\drivers\etc\hosts"
 rem 通过url更新
 set "update_url=https://raw.hellogithub.com/hosts"
 
