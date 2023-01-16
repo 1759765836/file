@@ -301,29 +301,30 @@ public class JsonUtil {
 				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
 				// 先比较哈希码
 				Object oldObject = hashMap.get(hashCode);
-				if (oldObject != null) {
-					/*
-					 * 此方法只比较public字段。
-					 * 不比较transient字段，因为它们不能被序列化。
-					 * 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
-					 * 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
-					 * @param excludeFields  不比较的字段
-					 */
-					if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
-					//if (this.isEquals(oldObject, object)) {
-						// 定制BaseModel对象
-						if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
-							String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
-							JSONObject json = new JSONObject();
-							json.put("fdId", fdId);
-							return json;
-						}
-						// 相同对象返回null
-						return null;
-					} else {
-						log.warn(object.getClass() + "：" + object.toString() + " 字段不相等！");
+				// 对象地址会发生变化废弃
+				//if (oldObject != null) {
+				/*
+				* 此方法只比较public字段。
+				* 不比较transient字段，因为它们不能被序列化。
+				* 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
+				* 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
+				* @param excludeFields  不比较的字段
+				*/
+				if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
+				//if (this.isEquals(oldObject, object)) {
+					// 定制BaseModel对象
+					if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
+						String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
+						JSONObject json = new JSONObject();
+						json.put("fdId", fdId);
+						return json;
 					}
+					// 相同对象返回null
+					return null;
+				} else {
+					log.warn(object.getClass() + "：" + object.toString() + " 字段不相等！");
 				}
+				//}
 			}
 			HashMap<Integer, Object> hashMap = this.recursionObject.get(recursionTimes);
 			hashMap.put(hashCode, object);
