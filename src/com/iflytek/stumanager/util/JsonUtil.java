@@ -303,7 +303,7 @@ public class JsonUtil {
 				Object oldObject = hashMap.get(hashCode);
 				// 对象地址会发生变化废弃
 				//if (oldObject != null) {
-				/*
+				/**
 				* 此方法只比较public字段。
 				* 不比较transient字段，因为它们不能被序列化。
 				* 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
