@@ -299,9 +299,9 @@ public class JsonUtil {
 			int hashCode = object.hashCode();
 			for (int i = recursionTimes + 1; i <= this.recursionTimes + 1; i++) {
 				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
-				// 先比较哈希码
+				// 先比较哈希码（存在缺陷，待修复。。。）
 				Object oldObject = hashMap.get(hashCode);
-				// 对象地址会发生变化废弃
+				// 对象地址会发生变化废弃（存在缺陷，待修复。。。）
 				//if (oldObject != null) {
 				/**
 				* 此方法只比较public字段。
