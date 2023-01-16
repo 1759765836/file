@@ -1,4 +1,6 @@
 git config --global http.proxy 127.0.0.1:10809
+（开头/末尾）
+ctrl+a / e
 
 颜群老师微信:157468995
 

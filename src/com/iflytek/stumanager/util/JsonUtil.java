@@ -19,7 +19,10 @@ public class JsonUtil {
 
 	private int recursionTimes = 4;
 	private String dateFormat = "yyyy-MM-dd HH:mm";
+	@SuppressWarnings("unused")
 	private final List<HashMap<Integer, Object>> recursionObject = new ArrayList<>();
+	// 使用对象引用代替哈希码
+	private final List<ArrayList<Object>> recursionObjectList = new ArrayList<>();
 //	private static final HashSet<String> EMPTY_EXCLUDNAME;
 //	static {
 //		EMPTY_EXCLUDNAME = new HashSet<String>();
@@ -161,14 +164,19 @@ public class JsonUtil {
 //		return jsonObject;
 
 		for (int i = 0; i <= this.recursionTimes; i++) {
-			HashMap<Integer, Object> hashMap = new HashMap<>();
-			this.recursionObject.add(hashMap);
+//			HashMap<Integer, Object> hashMap = new HashMap<>();
+//			this.recursionObject.add(hashMap);
+			ArrayList<Object> arrayList = new ArrayList<>();
+			this.recursionObjectList.add(arrayList);
 		}
 		// 初始对象始终保留不再递归出该对象的重复数据加入json中
-		HashMap<Integer, Object> hashMap = new HashMap<>();
-		hashMap.put(bean.hashCode(), bean);
-		this.recursionObject.add(hashMap);
-
+//		HashMap<Integer, Object> hashMap = new HashMap<>();
+//		hashMap.put(bean.hashCode(), bean);
+//		this.recursionObject.add(hashMap);
+		ArrayList<Object> arrayList = new ArrayList<>();
+		arrayList.add(bean);
+		this.recursionObjectList.add(arrayList);
+		
 		return parseBean(bean, this.recursionTimes, classCustomizer);
 	}
 
@@ -287,32 +295,48 @@ public class JsonUtil {
 
 			// 清除该递归次数中的所有对象
 			for (int i = recursionTimes; i > 0; i--) {
-				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
-				if (hashMap.isEmpty()) {
+//				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
+				ArrayList<Object> arrayList = this.recursionObjectList.get(i);
+				if (arrayList.isEmpty()) {
+//				if (hashMap.isEmpty()) {
 					break;
 				} else {
-					hashMap.clear();
+//					hashMap.clear();
+					arrayList.clear();
 				}
 			}
 
 			// 两个对象是包含的关系
-			int hashCode = object.hashCode();
+//			int hashCode = object.hashCode();
 			for (int i = recursionTimes + 1; i <= this.recursionTimes + 1; i++) {
-				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
-				// 先比较哈希码（存在缺陷，待修复。。。）
+				// 废弃（可能出现重复对象数据？标记-复制）
+				/*HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
+				// 先比较哈希码
 				Object oldObject = hashMap.get(hashCode);
-				// 对象地址会发生变化废弃（存在缺陷，待修复。。。）
-				//if (oldObject != null) {
-				/**
-				* 此方法只比较public字段。
-				* 不比较transient字段，因为它们不能被序列化。
-				* 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
-				* 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
-				* @param excludeFields  不比较的字段
-				*/
-				if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
-				//if (this.isEquals(oldObject, object)) {
-					// 定制BaseModel对象
+				if (oldObject != null) {
+//					 * 此方法只比较public字段。
+//					 * 不比较transient字段，因为它们不能被序列化。
+//					 * 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
+//					 * 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
+//					 * @param excludeFields  不比较的字段
+					if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
+					//if (this.isEquals(oldObject, object)) {
+						// 定制BaseModel对象
+						if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
+							String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
+							JSONObject json = new JSONObject();
+							json.put("fdId", fdId);
+							return json;
+						}
+						// 相同对象返回null
+						return null;
+					} else {
+						log.warn(object.getClass() + "：" + object.toString() + " 字段不相等！");
+					}
+				}*/
+				
+				ArrayList<Object> arrayList = this.recursionObjectList.get(i);
+				if (arrayList.contains(object)) {
 					if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
 						String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
 						JSONObject json = new JSONObject();
@@ -321,13 +345,14 @@ public class JsonUtil {
 					}
 					// 相同对象返回null
 					return null;
-				} else {
-					log.warn(object.getClass() + "：" + object.toString() + " 字段不相等！");
 				}
-				//}
+				
 			}
-			HashMap<Integer, Object> hashMap = this.recursionObject.get(recursionTimes);
-			hashMap.put(hashCode, object);
+//			HashMap<Integer, Object> hashMap = this.recursionObject.get(recursionTimes);
+//			hashMap.put(hashCode, object);
+			
+			ArrayList<Object> arrayList = recursionObjectList.get(recursionTimes);
+			arrayList.add(object);
 
 			// 再次解析并且递归次数减一
 			// JSONObject objectValue = getMethodValue(object, --recursionTimes);
@@ -447,7 +472,7 @@ public class JsonUtil {
 		@SuppressWarnings("unused")
 		private JSONObject parseForDeclaredField(Object bean, int recursionTimes) {
 			JSONObject jsonObject = new JSONObject();
-			// 通过getDeclaredFields()?法获取对象类中的所有属性（含私有）
+			// 通过getDeclaredFields()方法获取对象类中的所有属性（含私有）
 			java.lang.reflect.Field[] fields = bean.getClass().getDeclaredFields();
 
 			for (java.lang.reflect.Field field : fields) {
