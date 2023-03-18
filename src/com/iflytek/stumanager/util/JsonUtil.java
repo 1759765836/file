@@ -1,42 +1,40 @@
-package com.iflytek.stumanager.util;
+package com.landray.kmss.km.agreement.util;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
 import org.apache.commons.logging.Log;
-
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-	
+
 public class JsonUtil {
 	public static void main(String[] args) {
-		JSONObject jsonObject = new JsonUtil().beanToJson(String.valueOf(123));
-		System.out.println(jsonObject);
+		System.out.println(new JsonUtil().beanToJson("123"));
 	}
 
 	private int recursionTimes = 4;
 	private String dateFormat = "yyyy-MM-dd HH:mm";
-	@SuppressWarnings("unused")
-	private final List<HashMap<Integer, Object>> recursionObject = new ArrayList<>();
-	// 使用对象引用代替哈希码
-	private final List<ArrayList<Object>> recursionObjectList = new ArrayList<>();
+	
+	// 直接存储对象引用，哈希码第一次获取后生成固定字符串保存到对象头中
+	private final List<HashSet<Object>> recursionObject = new ArrayList<>();
 //	private static final HashSet<String> EMPTY_EXCLUDNAME;
 //	static {
 //		EMPTY_EXCLUDNAME = new HashSet<String>();
 //	}
 	private final HashSet<String> excludeFieldNames = new HashSet<>();
-	// 非静态内部类，先创建外部类的实例
-	public abstract static class ClassCustomizer<T> {
-		Class<?> clazz = this.getClass();
+
+	public abstract class JsonUtilClassCustomizer<T> {
 		public abstract JSONObject getValue(T object);
-		ClassCustomizer() {
+		
+		Class<?> clazz = this.getClass();
+		// 使用抽象类通过匿名内部类拿到泛型
+		public JsonUtilClassCustomizer() {
 			Type type = this.getClass().getGenericSuperclass();
 			if (type instanceof ParameterizedType) {
-				ParameterizedType parameterizedType = (ParameterizedType) type;
-				Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+				Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
 				if (actualTypeArguments.length > 0) {
 					Type actualTypeArgument = actualTypeArguments[0];
 					if (actualTypeArgument instanceof Class) {
@@ -45,7 +43,28 @@ public class JsonUtil {
 				}
 			}
 		}
+		
+		public boolean isClazz(Object object) {
+			if (this.clazz.isInstance(object)) {
+				return true;
+			}
+			return false;
+		}
+		public JSONObject getClazzValue(Object object) {
+			if (this.isClazz(object)) {
+				return this.getValue((T)object);
+			}
+			return null;
+		}
 	}
+	// 自定义类型定制器作为属性存入工具类中
+	JsonUtilClassCustomizer<?> classCustomizer = null;
+	
+//	public interface JsonUtilClassCustomizer<T> {
+//		public abstract JSONObject getValue(T object);
+//	}
+//	Class<?> jsonUtilClassCustomizer = JsonUtilClassCustomizer.class;
+	
 //	private Class<?> clazz = this.getClass();
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(JsonUtil.class);
 
@@ -97,19 +116,21 @@ public class JsonUtil {
 	
 	/**
 	 * JavaBean转换为JSONObject
+	 * @param bean
+	 * @return
 	 */
 	public JSONObject beanToJson(Object bean) {
 		final JsonUtil jsonUtil = this;
-		return beanToJson(bean, new ClassCustomizer<com.landray.kmss.sys.organization.model.SysOrgElement>() {
+		
+		return beanToJson(bean, this.new JsonUtilClassCustomizer<com.landray.kmss.sys.organization.model.SysOrgElement>() {
 			@Override
 			public JSONObject getValue(com.landray.kmss.sys.organization.model.SysOrgElement object) {
-				// TODO Auto-generated method stub
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("fdId", object.getFdId());
 				jsonObject.put("fdName", object.getFdName());
 				jsonObject.put("fdNo", object.getFdNo());
 				if (object.getFdParent() != null) {
-					Object value = jsonUtil.getValue(object.getFdParent(), jsonUtil.getRecursionTimes(), this);
+					Object value = jsonUtil.getValue(object.getFdParent(), jsonUtil.getRecursionTimesValue());
 					jsonObject.put("fdParent", value);
 				}
 				return jsonObject;
@@ -118,35 +139,35 @@ public class JsonUtil {
 //		return beanToJson(bean, null);
 	}
 
-	public <T> JSONObject beanToJson(Object bean, ClassCustomizer<T> classCustomizer) {
+	public <T> JSONObject beanToJson(Object bean, JsonUtilClassCustomizer<T> classCustomizer) {
 		if (bean == null) return null;
 
-//		if (classCustomizer != null) {
-//			// interface
-//			Type[] genericInterfaces = classCustomizer.getClass().getGenericInterfaces();
-//			if (genericInterfaces.length > 0) {
-//				Type type = genericInterfaces[0];
-//				if (type instanceof ParameterizedType) {
-//					ParameterizedType parameterizedType = (ParameterizedType) type;
-//					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-//					if (actualTypeArguments.length > 0) {
-//						Type actualTypeArgument = actualTypeArguments[0];
-//						if (actualTypeArgument instanceof Class) {
-//							this.clazz = (Class<?>) actualTypeArgument;
-//						}
-//					}
-//				}
-//			}
-//		}
 		if (classCustomizer == null) {
-			classCustomizer = new ClassCustomizer<T>() {
+			classCustomizer = new JsonUtilClassCustomizer<T>() {
 				@Override
 				public JSONObject getValue(T object) {
 					return null;
 				}
 			};
-			classCustomizer.clazz = classCustomizer.getClass();
 		}
+		this.classCustomizer = classCustomizer;
+		
+		
+		/*Type[] genericInterfaces = classCustomizer.getClass().getGenericInterfaces();
+		if (genericInterfaces.length > 0) {
+			Type type = genericInterfaces[0];
+			if (type instanceof ParameterizedType) {
+				ParameterizedType parameterizedType = (ParameterizedType) type;
+				Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+				if (actualTypeArguments.length > 0) {
+					Type actualTypeArgument = actualTypeArguments[0];
+					if (actualTypeArgument instanceof Class) {
+						this.jsonUtilClassCustomizer = (Class<?>) actualTypeArgument;
+					}
+				}
+			}
+		}*/
+		
 		// class
 		this.excludeFieldNames.add("class");
 		this.excludeFieldNames.add("formClass");
@@ -164,41 +185,36 @@ public class JsonUtil {
 //		return jsonObject;
 
 		for (int i = 0; i <= this.recursionTimes; i++) {
-//			HashMap<Integer, Object> hashMap = new HashMap<>();
-//			this.recursionObject.add(hashMap);
-			ArrayList<Object> arrayList = new ArrayList<>();
-			this.recursionObjectList.add(arrayList);
+			HashSet<Object> set = new HashSet<>();
+			this.recursionObject.add(set);
 		}
 		// 初始对象始终保留不再递归出该对象的重复数据加入json中
-//		HashMap<Integer, Object> hashMap = new HashMap<>();
-//		hashMap.put(bean.hashCode(), bean);
-//		this.recursionObject.add(hashMap);
-		ArrayList<Object> arrayList = new ArrayList<>();
-		arrayList.add(bean);
-		this.recursionObjectList.add(arrayList);
-		
-		return parseBean(bean, this.recursionTimes, classCustomizer);
+		HashSet<Object> set = new HashSet<>();
+		set.add(bean.hashCode());
+		this.recursionObject.add(set);
+
+		return parseBean(bean, this.recursionTimes);
 	}
 
 	/**
 	 * 解析JavaBean
 	 */
-	public JSONObject parseBean(Object bean, int recursionTimes, ClassCustomizer<?> classCustomizer) {
+	public JSONObject parseBean(Object bean, int recursionTimes) {
 //		this.oneBreadthIsRecursion = true;
 		JSONObject jsonObject = new JSONObject();
 
 		java.beans.PropertyDescriptor[] propertyDescriptors = 
 				org.apache.commons.beanutils.PropertyUtils.getPropertyDescriptors(bean);
 		for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-			this.setJsonObject(jsonObject, propertyDescriptor, bean, recursionTimes, classCustomizer);
+			this.setJsonObject(jsonObject, propertyDescriptor, bean, recursionTimes);
 		}
 		return jsonObject;
 	}
 	
-	private void setJsonObject(JSONObject jsonObject, PropertyDescriptor propertyDescriptor,
-			Object bean, int recursionTimes, ClassCustomizer<?> classCustomizer) {
+	private void setJsonObject(JSONObject jsonObject, PropertyDescriptor propertyDescriptor, Object bean, 
+			int recursionTimes) {
 		String name = propertyDescriptor.getName();
-		// 通过哈希函数，能够快速地对数据元素进行定位，hash算法尽量减少冲突使链表长度尽可能短，理想状态下时间复杂度为O(1)
+		// 通过哈希函数快速地对数据元素进行定位
 		if (!this.excludeFieldNames.contains(name)) {
 			Method readMethod = propertyDescriptor.getReadMethod();
 			if (readMethod != null) {
@@ -206,11 +222,14 @@ public class JsonUtil {
 				try {
 					property = org.apache.commons.beanutils.PropertyUtils.getProperty(bean, name);
 				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				if (property instanceof com.landray.kmss.sys.organization.model.SysOrgElement) {
+//					System.out.println(true);
+				}
+				Object value = this.getValue(property, recursionTimes);
 				
-				Object value = this.getValue(property, recursionTimes, classCustomizer);
+//				System.out.println(value);
 				// key为null时，net.sf.json.JSONObject无法存入，修改为"null"。value为null时，修改为空仍然存放到jsonObject
 				jsonObject.put(name == null ? "null" : name, value == null ? "" : value);
 			} else {
@@ -225,7 +244,7 @@ public class JsonUtil {
 	 * @param object 字段对象
 	 * @param recursionTimes 递归次数
 	 */
-	public <T> Object getValue(Object object, int recursionTimes, ClassCustomizer<T> classCustomizer) {
+	public <T> Object getValue(Object object, int recursionTimes) {
 		// JSONObject中放置Map的时候，会自动将Map看成是JSONObject来处理。JSON allows only string to be a key
 //		if(recursionTimes <= 0)
 //			return object.getClass();
@@ -246,7 +265,7 @@ public class JsonUtil {
 //            	Integer times = this.recursionClassTimes.get(superclass.getName());
 //        		if(times != null) 
 //        			--recursionTimes;
-				Object val = this.getValue(next, recursionTimes, classCustomizer);
+				Object val = this.getValue(next, recursionTimes);
 				jsonArray.add(val);
 			}
 			value = jsonArray;
@@ -256,12 +275,11 @@ public class JsonUtil {
 			try {
 				for (Object key : map.keySet()) {
 					Object obj = map.get(key);
-					Object val = this.getValue(obj, recursionTimes, classCustomizer);
+					Object val = this.getValue(obj, recursionTimes);
 
 					jsonObject.put(key == null ? "null" : key.toString(), val == null ? "" : val);
 				}
 			} catch (java.lang.UnsupportedOperationException e) {
-				// TODO: handle exception
 				e.printStackTrace();
 			}
 			value = jsonObject;
@@ -269,74 +287,53 @@ public class JsonUtil {
 			JSONArray jsonArray = new JSONArray();
 			for (int i = 0; i < Array.getLength(object); i++) {
 				Object obj = Array.get(object, i);
-				Object val = this.getValue(obj, recursionTimes, classCustomizer);
+				Object val = this.getValue(obj, recursionTimes);
 				jsonArray.add(val);
 			}
 			value = jsonArray;
 		} else {
-			if (classCustomizer.clazz.isInstance(object)) {
-//			if (this.clazz.isInstance(object)) {
-				return classCustomizer.getValue((T)object);
-			}
-//			if (classCustomizer != null) {
-//				Type[] genericInterfaces = classCustomizer.getClass().getGenericInterfaces();
-//				Type type = genericInterfaces[0];
-//				if (type instanceof ParameterizedType) {
-//				    ParameterizedType parameterizedType = (ParameterizedType) type;
-//				    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-//				    Class<?> clazz = (Class<?>) actualTypeArguments[0];
-//				    if (clazz.isInstance(object)) {
-//				    	return classCustomizer.getValue((T)object);
-//				    }
-//				}
-//			}
-			
 			if (recursionTimes <= 0) return object.getClass();
+
+			// 不再受次数限制
+//			if (this.clazz.isInstance(object)) {
+			JSONObject clazzValue = this.classCustomizer.getClazzValue(object);
+			// 自定义对象类型的方法获取数据返回null后不保存，继续向下执行解析对象属性
+			if (clazzValue != null) {
+				return clazzValue;
+			}
 
 			// 清除该递归次数中的所有对象
 			for (int i = recursionTimes; i > 0; i--) {
-//				HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
-				ArrayList<Object> arrayList = this.recursionObjectList.get(i);
-				if (arrayList.isEmpty()) {
-//				if (hashMap.isEmpty()) {
+				HashSet<Object> hashMap = this.recursionObject.get(i);
+				if (hashMap.isEmpty()) {
 					break;
 				} else {
-//					hashMap.clear();
-					arrayList.clear();
+					hashMap.clear();
 				}
 			}
 
 			// 两个对象是包含的关系
 //			int hashCode = object.hashCode();
 			for (int i = recursionTimes + 1; i <= this.recursionTimes + 1; i++) {
-				// 废弃（可能出现重复对象数据？标记-复制）
-				/*HashMap<Integer, Object> hashMap = this.recursionObject.get(i);
+				HashSet<Object> set = this.recursionObject.get(i);
 				// 先比较哈希码
-				Object oldObject = hashMap.get(hashCode);
-				if (oldObject != null) {
-//					 * 此方法只比较public字段。
-//					 * 不比较transient字段，因为它们不能被序列化。
-//					 * 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
-//					 * 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
-//					 * @param excludeFields  不比较的字段
-					if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
-					//if (this.isEquals(oldObject, object)) {
-						// 定制BaseModel对象
-						if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
-							String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
-							JSONObject json = new JSONObject();
-							json.put("fdId", fdId);
-							return json;
-						}
-						// 相同对象返回null
-						return null;
+//				Object oldObject = hashMap.get(hashCode);
+//				if (oldObject != null) {
+// 如果出现自循环引用将无法正确解析，比如张三的属性修改人是张三，张三的属性组员是李四，李四的修改人是张三（该对象张三无法将会被错误忽略）
+// 改进方向：存储对象引用同时保存次数一直到两次。HashMap(Object, Integer)
+				if (set.contains(object)) {
+					/*
+					 * 此方法只比较public字段。
+					 * 不比较transient字段，因为它们不能被序列化。
+					 * 此外，此方法不比较static字段，因为它们不是对象实例的一部分。
+					 * 如果某个字段是一个数组/Map/Collection，则比较内容，而不是对象的引用。
+					 * @param excludeFields  不比较的字段
+					 */
+					/*if (org.apache.commons.lang.builder.EqualsBuilder.reflectionEquals(oldObject, object)) {
 					} else {
 						log.warn(object.getClass() + "：" + object.toString() + " 字段不相等！");
-					}
-				}*/
-				
-				ArrayList<Object> arrayList = this.recursionObjectList.get(i);
-				if (arrayList.contains(object)) {
+					}*/
+					// 定制BaseModel对象
 					if (com.landray.kmss.common.model.BaseModel.class.isAssignableFrom(object.getClass())) {
 						String fdId = ((com.landray.kmss.common.model.BaseModel) object).getFdId();
 						JSONObject json = new JSONObject();
@@ -346,17 +343,12 @@ public class JsonUtil {
 					// 相同对象返回null
 					return null;
 				}
-				
 			}
-//			HashMap<Integer, Object> hashMap = this.recursionObject.get(recursionTimes);
-//			hashMap.put(hashCode, object);
-			
-			ArrayList<Object> arrayList = recursionObjectList.get(recursionTimes);
-			arrayList.add(object);
-
+			HashSet<Object> set = this.recursionObject.get(recursionTimes);
+			set.add(object);
 			// 再次解析并且递归次数减一
 			// JSONObject objectValue = getMethodValue(object, --recursionTimes);
-			value = this.parseBean(object, --recursionTimes, classCustomizer);
+			value = this.parseBean(object, --recursionTimes);
 		}
 		return value;
 	}
@@ -365,8 +357,8 @@ public class JsonUtil {
 		this.recursionTimes = recursionTimes;
 	}
 	
-	public int getRecursionTimes() {
-		return recursionTimes;
+	public int getRecursionTimesValue() {
+		return --recursionTimes;
 	}
 
 	public void addExcludeFieldNames(List<String> excludeFieldNames) {
@@ -376,7 +368,7 @@ public class JsonUtil {
 	public boolean removeExcludeFieldNames(String fieldName) {
 		return excludeFieldNames.remove(fieldName);
 	}
-	
+
 	public void clearExcludeField() {
 		excludeFieldNames.clear();
 	}
@@ -472,7 +464,7 @@ public class JsonUtil {
 		@SuppressWarnings("unused")
 		private JSONObject parseForDeclaredField(Object bean, int recursionTimes) {
 			JSONObject jsonObject = new JSONObject();
-			// 通过getDeclaredFields()方法获取对象类中的所有属性（含私有）
+			// 通过getDeclaredFields()?法获取对象类中的所有属性（含私有）
 			java.lang.reflect.Field[] fields = bean.getClass().getDeclaredFields();
 
 			for (java.lang.reflect.Field field : fields) {
